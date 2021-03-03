@@ -19,8 +19,17 @@ typedef enum BTN_NAMES_t{
 	BTN_MAX,
 }BTN_NAMES_t;
 
+typedef enum FEEDER_STATES_t{
+	IDLE,
+	RTC_OofS,
+	FEED,
+	ERROR,
+}FEEDER_STATES_t;
+
 struct FeederState
 {
+	FEEDER_STATES_t state;
+	bool new_state;
 	struct tm date_time;
 	time_t timestamp;
 	uint8_t feedQty;
@@ -28,6 +37,8 @@ struct FeederState
 	uint8_t spd;
 	BTN_INSTANCE_t instance[BTN_MAX];
 } ;
+
+
 
 extern struct FeederState feeder;
 #ifndef INC_FEEDER_H_

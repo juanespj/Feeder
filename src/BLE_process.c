@@ -19,7 +19,7 @@
  ********************************************************************************/
 #define BLESS_INTR_PRIORITY       (1u)
 #define STRING_BUFFER_SIZE (80)
-
+#define TICK 1//ms
 cyhal_rtc_t rtc_obj;
 
 /* Connection handle to identify the connected peer device */
@@ -31,10 +31,11 @@ void ble_stack_event_handler(uint32_t event, void * eventParam);
 static void ble_init(void);
 static void bless_interrupt_handler(void);
 void UpdateTime(void);
-time_t GetTime(void);
+void GetTime(void);
 
+uint32_t ledtimer = 0;
+time_t dispense_tmr = 0;
 /** This structure is used to hold the machine state */
-
 struct FeederState feeder;
 
 void ble_feeder_init(void) {
@@ -50,6 +51,40 @@ void ble_feeder_init(void) {
 	//wakeup_timer_init();
 	/* Enable global interrupts */
 	__enable_irq();
+	dispense_tmr+=TICK;
+}
+
+/****
+ * machine task
+ *
+ *
+ */
+void feeder_process(void) {
+	ble_process();
+	switch (feeder.state) {
+	case IDLE:
+		if (feeder.timestamp == 0) {
+			feeder.state = RTC_OofS;
+		}
+		break;
+	case FEED:
+		if (feeder.new_state) {
+			dispense_tmr=feeder.timestamp;
+			//start counter
+			Cy_TCPWM_TriggerStart_Single(motCount_HW, motCount_NUM);
+			//start Motor
+			Cy_TCPWM_TriggerStart_Single(motTrig_HW, motTrig_NUM);
+			//turns off when count is reached
+		}
+
+
+		break;
+	case RTC_OofS:
+
+		break;
+	case ERROR:
+		break;
+	}
 
 }
 
@@ -87,7 +122,7 @@ static void ble_init(void) {
 	Cy_BLE_EnableLowPowerMode();
 
 }
-uint32_t ledtimer = 0;
+
 /*******************************************************************************
  * Function Name: ble_findme_process
  ********************************************************************************
@@ -116,9 +151,9 @@ void ble_process(void) {
 		ledtimer = 0;
 	}
 	ledtimer += 1;
+//epoch 1614804922
 
-
-	//time_t test;
+//time_t test;
 //	test = GetTime();
 }
 /******************************************************************************
@@ -132,21 +167,18 @@ static void bless_interrupt_handler(void) {
 	Cy_BLE_BlessIsrHandler();
 }
 
-
-
 void ble_stack_event_handler(uint32 event, void * eventParam) {
 	/* Variable used to store the return values of BLE APIs */
 	cy_en_ble_api_result_t ble_api_result;
-
+	uint32_t tempval = 0;
 	/* 'RGBledData[]' is an array to store 4 bytes of RGB LED data*/
 
 	switch (event) {
 	case CY_BLE_EVT_STACK_ON:
 		iprintf("BLE Stack Event : CY_BLE_EVT_STACK_ON");
 		/* Start Advertisement and enter discoverable mode */
-		ble_api_result = Cy_BLE_GAPP_StartAdvertisement(
-		CY_BLE_ADVERTISING_FAST,
-		CY_BLE_PERIPHERAL_CONFIGURATION_0_INDEX);
+		ble_api_result = Cy_BLE_GAPP_StartAdvertisement(CY_BLE_ADVERTISING_FAST,
+				CY_BLE_PERIPHERAL_CONFIGURATION_0_INDEX);
 		if (ble_api_result == CY_BLE_SUCCESS) {
 			iprintf("BLE Advertisement started successfully");
 		} else {
@@ -158,7 +190,7 @@ void ble_stack_event_handler(uint32 event, void * eventParam) {
 		/* This event is generated at GAP disconnection. */
 		/* Restart advertisement */
 		Cy_BLE_GAPP_StartAdvertisement(CY_BLE_ADVERTISING_FAST,
-		CY_BLE_PERIPHERAL_CONFIGURATION_0_INDEX);
+				CY_BLE_PERIPHERAL_CONFIGURATION_0_INDEX);
 		break;
 		/* This event is generated at the GAP Peripheral end after connection
 		 * is completed with peer Central device */
@@ -175,8 +207,11 @@ void ble_stack_event_handler(uint32 event, void * eventParam) {
 		if (CY_BLE_TIME_TIMESTAMP_CHAR_HANDLE
 				== wrReqParam->handleValPair.attrHandle) {
 			/* Store RGB LED data in local array */
-			feeder.timestamp = *(wrReqParam->handleValPair.value.val);
-
+			//feeder.timestamp = *(wrReqParam->handleValPair.value.val);
+			memcpy(&tempval, wrReqParam->handleValPair.value.val,
+					(size_t) 0x04u);
+			feeder.timestamp = tempval;
+			UpdateTime();
 		}
 		if (CY_BLE_TRIGGER_FEEDQTY_CHAR_HANDLE
 				== wrReqParam->handleValPair.attrHandle) {
@@ -197,7 +232,7 @@ void ble_stack_event_handler(uint32 event, void * eventParam) {
 
 		}
 		/* Send the response to the write request received. */
-		UpdateTime();
+
 		/* Send response to GATT Client device */
 		Cy_BLE_GATTS_WriteRsp(conn_handle);
 		break;
@@ -206,35 +241,30 @@ void ble_stack_event_handler(uint32 event, void * eventParam) {
 	}
 }
 
+struct tm *date_time;
 
 void UpdateTime(void) {
 	/* Local variables to store calculated color components */
 	cy_rslt_t rslt;
-	struct tm *datetime;
 
-	datetime = localtime(&feeder.timestamp);
-
-	rslt = cyhal_rtc_write(&rtc_obj, datetime);
+	date_time = localtime(&feeder.timestamp);
+	date_time->tm_year -= 100;
+	rslt = cyhal_rtc_write(&rtc_obj, date_time);
 	if (CY_RSLT_SUCCESS == rslt) {
 
 	}
 	GetTime();
 }
 
-
-time_t GetTime(void) {
+void GetTime(void) {
 	/* Local variables to store calculated color components */
 	cy_rslt_t rslt;
-	time_t temp;
-	struct tm *date_time;
 
 	rslt = cyhal_rtc_read(&rtc_obj, &feeder.date_time);
 	if (CY_RSLT_SUCCESS == rslt) {
 
 	}
-
-	temp = mktime(date_time);
-	return temp;
+	feeder.timestamp = mktime(date_time);
 }
 void UpdateRGBcharacteristic(uint64* timestampData, uint8 timestamplen,
 		uint16 attrHandle) {

@@ -111,13 +111,6 @@ void InitializeSystem(void) {
 	/* Enable the initialized PWM */
 	Cy_TCPWM_Counter_Enable(motCount_HW, motCount_NUM);
 
-//	Cy_TCPWM_TriggerStopOrKill_Single(motCount_HW, motCount_NUM);
-	//Cy_TCPWM_Counter_SetCounter(motCount_HW, motCount_NUM, 0);
-
-	Cy_SysLib_Delay(1000);
-	Cy_TCPWM_TriggerStart_Single(motCount_HW, motCount_NUM);
-
-
 	///START BLE
 	ble_feeder_init();
 }
@@ -134,7 +127,7 @@ int main(void) {
 		if (BTN_getPressed(MAIN_BTN)) {
 			/* Insert logic for High pin state */
 			Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_ON); /*  start the PWM */
-			Cy_TCPWM_TriggerStart_Single(motTrig_HW, motTrig_NUM);
+
 		} else {
 			/* Insert logic for Low pin state */
 			//	Cy_TCPWM_TriggerStopOrKill_Single(motTrig_HW, motTrig_NUM);
