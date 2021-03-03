@@ -30,20 +30,25 @@ First of all I had to start the hacking of the machine so will detail that proce
 
 <img align="right"  height="200" src="images/fig1.png">
 <img align="right"  height="200" src="images/fig1a.png">
-<img align="right"  height="200" src="images/fig1c.jpg">
-** Motor Encoder - Photo Interrupt sensor **
+
+** Motor Encoder - Photo Interrupt sensor **  
 
 I actually burned the sensor before doing this (luckily I had an equivalent scrapped sensor from an old printer)
 the schematic is important the diode polarity can be ID with a multimeter and then the remaining pin is the signal one.
 
 This signal will be measured by a TCPWM Counter block 
-the number of counts/pulses (Food dispensed) will be available to modify through the BLE interface
+
+The number of counts/pulses (Food dispensed) will be available to modify through the BLE interface
 once that count is reached the counter will signal a kill/stop interrupt to the TCPWM PWM block controling the motor   
 
 
-** RGB LED and button **
-<img align="right"  height="200" src="images/fig1f.jpg">
-The UI for the machine is basically this RGB led ring and the push button, the LEDs are wired in common Anode, and also got them to run at a decent brightness at 3,3V, the button is just a switch signal
+** RGB LED and button **  
+<img align="right"  height="150" src="images/fig1f.jpg">
+The UI for the machine is basically this RGB led ring and the push button
+
+3 LEDs are wired in common Anode, and also got them to run at a decent brightness at 3,3V
+
+Button is just a switch signal
 
 Color 	| Signal 	|PSoC Pin
  ------ |:---------:| -----: 
@@ -57,6 +62,11 @@ BLK		|Sensor1	|
 BL		|Sensor2	|	
 Y		|Sensor2	|	
 
+** Motor Dispensing wheel **  
+<img align="right"  height="150" src="images/fig1b.jpg">
+
+Since the motor only needs to turn in one direction I wired it to a MosFET with a pull down circuit on the base.
+ 
 
 ## Software Setup
 
