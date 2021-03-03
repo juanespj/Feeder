@@ -1,7 +1,8 @@
-# PSoC 6 BLE PetNet Retrofit Smart FEEDER (WORK in Progress)  
-\
-<img align="right"  height="200" src="images/fig1d.jpg">
+<h1>PSoC 6 BLE PetNet Retrofit Smart FEEDER (WORK in Progress)<br/></h1>
+
 <img align="right"  height="200" src="images/fig1e.jpg">
+<img align="right"  height="200" src="images/fig1d.jpg">
+
 This code implements a custom bluetooth GATT profile to control the machine remotely via Bluetooth
 
 Designed with the - [PSoC 6 BLE Prototyping Kit](https://www.cypress.com/CY8CPROTO-063-BLE) (`CY8CPROTO-063-BLE`)
@@ -43,7 +44,7 @@ once that count is reached the counter will signal a kill/stop interrupt to the 
 
 
 ** RGB LED and button **  
-<img align="right"  height="150" src="images/fig1f.jpg">
+<img align="right"  height="200" src="images/fig1f.jpg">
 The UI for the machine is basically this RGB led ring and the push button
 
 3 LEDs are wired in common Anode, and also got them to run at a decent brightness at 3,3V
@@ -66,7 +67,11 @@ Y		|Sensor2	|
 <img align="right"  height="150" src="images/fig1b.jpg">
 
 Since the motor only needs to turn in one direction I wired it to a MosFET with a pull down circuit on the base.
+ ** TO-DO Optical food detector Sensor **  
+ ** TO-DO Bowl Load cell **
+ ** TO-DO feet load cells **
  
+ -[Sensors]( https://www.ebay.co.uk/itm/303855778675?chn=ps&norover=1&mkevt=1&mkrid=710-134428-41853-0&mkcid=2&itemid=303855778675&targetid=1140163974929&device=c&mktype=pla&googleloc=9045800&poi=&campaignid=12125486315&mkgroupid=120441250001&rlsatarget=pla-1140163974929&abcId=9300482&merchantid=232720907&gclid=Cj0KCQiA4feBBhC9ARIsABp_nbVeO-maT-7PBX2_2pwD26gYHb7XyzfnuWVwO41Hd_iXCy9vbLXiAMgaAjOXEALw_wcB) 
 
 ## Software Setup
 
