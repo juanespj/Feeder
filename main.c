@@ -119,7 +119,7 @@ int main(void) {
 	InitializeSystem();
 	/* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
 	printf("\x1b[2J\x1b[;H");
-	printf("PSoC 6 MCU With BLE Connectivity Find Me\r\n\n");
+	printf("PSoC 6 Feeder\r\n\n");
 
 	for (;;) {
 		feeder_process();

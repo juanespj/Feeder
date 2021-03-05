@@ -308,7 +308,7 @@
                                         </BleProperty>
                                         <BleProperty>
                                             <Property id="PropertyType" value="Notify"/>
-                                            <Property id="Present" value="false"/>
+                                            <Property id="Present" value="true"/>
                                             <Property id="Mandatory" value="false"/>
                                         </BleProperty>
                                         <BleProperty>
@@ -372,6 +372,43 @@
                                                 <Property id="AuthorizationPermissionWrite" value="NoAuthorizationRequired"/>
                                             </Permission>
                                         </Descriptor>
+                                        <Descriptor type="org.bluetooth.descriptor.gatt.client_characteristic_configuration">
+                                            <Fields>
+                                                <Field>
+                                                    <FieldProperties>
+                                                        <Property id="Name" value="Properties"/>
+                                                        <Property id="Value" value=""/>
+                                                        <Property id="Format" value="f_16bit"/>
+                                                    </FieldProperties>
+                                                    <BitField>
+                                                        <Property id="BitValue" value="0"/>
+                                                        <Property id="BitValue" value="0"/>
+                                                    </BitField>
+                                                </Field>
+                                            </Fields>
+                                            <Properties>
+                                                <BleProperty>
+                                                    <Property id="PropertyType" value="Read"/>
+                                                    <Property id="Present" value="true"/>
+                                                    <Property id="Mandatory" value="false"/>
+                                                </BleProperty>
+                                                <BleProperty>
+                                                    <Property id="PropertyType" value="Write"/>
+                                                    <Property id="Present" value="true"/>
+                                                    <Property id="Mandatory" value="false"/>
+                                                </BleProperty>
+                                            </Properties>
+                                            <Permission>
+                                                <Property id="AccessPermissionRead" value="true"/>
+                                                <Property id="EncryptionPermissionRead" value="NoEncryptionRequired"/>
+                                                <Property id="AuthenticationPermissionRead" value="NoAuthenticationRequired"/>
+                                                <Property id="AuthorizationPermissionRead" value="NoAuthorizationRequired"/>
+                                                <Property id="AccessPermissionWrite" value="true"/>
+                                                <Property id="EncryptionPermissionWrite" value="NoEncryptionRequired"/>
+                                                <Property id="AuthenticationPermissionWrite" value="NoAuthenticationRequired"/>
+                                                <Property id="AuthorizationPermissionWrite" value="NoAuthorizationRequired"/>
+                                            </Permission>
+                                        </Descriptor>
                                     </Descriptors>
                                 </Characteristic>
                                 <Characteristic type="org.bluetooth.characteristic.custom">
@@ -416,7 +453,7 @@
                                         </BleProperty>
                                         <BleProperty>
                                             <Property id="PropertyType" value="Notify"/>
-                                            <Property id="Present" value="false"/>
+                                            <Property id="Present" value="true"/>
                                             <Property id="Mandatory" value="false"/>
                                         </BleProperty>
                                         <BleProperty>
@@ -480,6 +517,43 @@
                                                 <Property id="AuthorizationPermissionWrite" value="NoAuthorizationRequired"/>
                                             </Permission>
                                         </Descriptor>
+                                        <Descriptor type="org.bluetooth.descriptor.gatt.client_characteristic_configuration">
+                                            <Fields>
+                                                <Field>
+                                                    <FieldProperties>
+                                                        <Property id="Name" value="Properties"/>
+                                                        <Property id="Value" value=""/>
+                                                        <Property id="Format" value="f_16bit"/>
+                                                    </FieldProperties>
+                                                    <BitField>
+                                                        <Property id="BitValue" value="0"/>
+                                                        <Property id="BitValue" value="0"/>
+                                                    </BitField>
+                                                </Field>
+                                            </Fields>
+                                            <Properties>
+                                                <BleProperty>
+                                                    <Property id="PropertyType" value="Read"/>
+                                                    <Property id="Present" value="true"/>
+                                                    <Property id="Mandatory" value="false"/>
+                                                </BleProperty>
+                                                <BleProperty>
+                                                    <Property id="PropertyType" value="Write"/>
+                                                    <Property id="Present" value="true"/>
+                                                    <Property id="Mandatory" value="false"/>
+                                                </BleProperty>
+                                            </Properties>
+                                            <Permission>
+                                                <Property id="AccessPermissionRead" value="true"/>
+                                                <Property id="EncryptionPermissionRead" value="NoEncryptionRequired"/>
+                                                <Property id="AuthenticationPermissionRead" value="NoAuthenticationRequired"/>
+                                                <Property id="AuthorizationPermissionRead" value="NoAuthorizationRequired"/>
+                                                <Property id="AccessPermissionWrite" value="true"/>
+                                                <Property id="EncryptionPermissionWrite" value="NoEncryptionRequired"/>
+                                                <Property id="AuthenticationPermissionWrite" value="NoAuthenticationRequired"/>
+                                                <Property id="AuthorizationPermissionWrite" value="NoAuthorizationRequired"/>
+                                            </Permission>
+                                        </Descriptor>
                                     </Descriptors>
                                 </Characteristic>
                                 <Characteristic type="org.bluetooth.characteristic.custom">
@@ -524,7 +598,7 @@
                                         </BleProperty>
                                         <BleProperty>
                                             <Property id="PropertyType" value="Notify"/>
-                                            <Property id="Present" value="false"/>
+                                            <Property id="Present" value="true"/>
                                             <Property id="Mandatory" value="false"/>
                                         </BleProperty>
                                         <BleProperty>
@@ -583,6 +657,43 @@
                                                 <Property id="AuthenticationPermissionRead" value="NoAuthenticationRequired"/>
                                                 <Property id="AuthorizationPermissionRead" value="NoAuthorizationRequired"/>
                                                 <Property id="AccessPermissionWrite" value="false"/>
+                                                <Property id="EncryptionPermissionWrite" value="NoEncryptionRequired"/>
+                                                <Property id="AuthenticationPermissionWrite" value="NoAuthenticationRequired"/>
+                                                <Property id="AuthorizationPermissionWrite" value="NoAuthorizationRequired"/>
+                                            </Permission>
+                                        </Descriptor>
+                                        <Descriptor type="org.bluetooth.descriptor.gatt.client_characteristic_configuration">
+                                            <Fields>
+                                                <Field>
+                                                    <FieldProperties>
+                                                        <Property id="Name" value="Properties"/>
+                                                        <Property id="Value" value=""/>
+                                                        <Property id="Format" value="f_16bit"/>
+                                                    </FieldProperties>
+                                                    <BitField>
+                                                        <Property id="BitValue" value="0"/>
+                                                        <Property id="BitValue" value="0"/>
+                                                    </BitField>
+                                                </Field>
+                                            </Fields>
+                                            <Properties>
+                                                <BleProperty>
+                                                    <Property id="PropertyType" value="Read"/>
+                                                    <Property id="Present" value="true"/>
+                                                    <Property id="Mandatory" value="false"/>
+                                                </BleProperty>
+                                                <BleProperty>
+                                                    <Property id="PropertyType" value="Write"/>
+                                                    <Property id="Present" value="true"/>
+                                                    <Property id="Mandatory" value="false"/>
+                                                </BleProperty>
+                                            </Properties>
+                                            <Permission>
+                                                <Property id="AccessPermissionRead" value="true"/>
+                                                <Property id="EncryptionPermissionRead" value="NoEncryptionRequired"/>
+                                                <Property id="AuthenticationPermissionRead" value="NoAuthenticationRequired"/>
+                                                <Property id="AuthorizationPermissionRead" value="NoAuthorizationRequired"/>
+                                                <Property id="AccessPermissionWrite" value="true"/>
                                                 <Property id="EncryptionPermissionWrite" value="NoEncryptionRequired"/>
                                                 <Property id="AuthenticationPermissionWrite" value="NoAuthenticationRequired"/>
                                                 <Property id="AuthorizationPermissionWrite" value="NoAuthorizationRequired"/>

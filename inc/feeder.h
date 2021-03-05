@@ -33,7 +33,7 @@ struct FeederState
 	struct tm date_time;
 	time_t timestamp;
 	uint8_t feedQty;
-	uint16_t trigger;
+	uint8_t trigger;
 	uint8_t spd;
 	BTN_INSTANCE_t bttns[BTN_MAX];
 } ;
