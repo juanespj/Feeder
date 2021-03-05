@@ -26,13 +26,13 @@
 bool BTN_getPressed(BTN_NAMES_t button) {
 	bool result = false;
 
-	if (feeder.instance[button].isPressed) {
+	if (feeder.bttns[button].isPressed) {
 		//------------------------------------------------------
 		// only return the press if not acknowledged
 		//------------------------------------------------------
-		if (!feeder.instance[button].isAcknowledged) {
+		if (!feeder.bttns[button].isAcknowledged) {
 			result = true;
-			feeder.instance[button].isAcknowledged = true;
+			feeder.bttns[button].isAcknowledged = true;
 		}
 	}
 
@@ -48,7 +48,7 @@ bool BTN_getPressed(BTN_NAMES_t button) {
  * button clears the flag. There is no time base on held events.
  */
 bool BTN_getHeld(BTN_NAMES_t button) {
-	return feeder.instance[button].isHeld;
+	return feeder.bttns[button].isHeld;
 }
 
 void BTN_task(void) {
@@ -56,32 +56,32 @@ void BTN_task(void) {
 
 	//--------------------------------------------
 	// get the values from the GPIO
-	feeder.instance[MAIN_BTN].sense = !Cy_GPIO_Read(BTN_PORT, BTN_NUM);
-	feeder.instance[USRBTN].sense = !Cy_GPIO_Read(USR_BTN_PORT, USR_BTN_NUM);
+	feeder.bttns[MAIN_BTN].sense = !Cy_GPIO_Read(BTN_PORT, BTN_NUM);
+	feeder.bttns[USRBTN].sense = !Cy_GPIO_Read(USR_BTN_PORT, USR_BTN_NUM);
 
 	//--------------------------------------------
 	// software debounce for press / hold events.
 	//--------------------------------------------
 	for (i = 0; i < BTN_MAX; i++) {
-		if (feeder.instance[i].sense == 1) {
-			if (feeder.instance[i].timer < BTN_HOLD_TIME) {
-				feeder.instance[i].timer += BTN_TICK_TIME;
+		if (feeder.bttns[i].sense == 1) {
+			if (feeder.bttns[i].timer < BTN_HOLD_TIME) {
+				feeder.bttns[i].timer += BTN_TICK_TIME;
 			} else {
-				feeder.instance[i].isHeld = true;
+				feeder.bttns[i].isHeld = true;
 			}
 
-			if (feeder.instance[i].timer > BTN_PRESS_MSEC) {
-				if (!feeder.instance[i].isAcknowledged) {
-					feeder.instance[i].isPressed = true;
+			if (feeder.bttns[i].timer > BTN_PRESS_MSEC) {
+				if (!feeder.bttns[i].isAcknowledged) {
+					feeder.bttns[i].isPressed = true;
 				}
 			}
 		} else {
-			feeder.instance[i].timer = 0;
-			feeder.instance[i].isHeld = false;
+			feeder.bttns[i].timer = 0;
+			feeder.bttns[i].isHeld = false;
 
-			if (feeder.instance[i].isAcknowledged == true) {
-				feeder.instance[i].isPressed = false;
-				feeder.instance[i].isAcknowledged = false;
+			if (feeder.bttns[i].isAcknowledged == true) {
+				feeder.bttns[i].isPressed = false;
+				feeder.bttns[i].isAcknowledged = false;
 			}
 		}
 	}

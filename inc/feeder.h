@@ -35,7 +35,7 @@ struct FeederState
 	uint8_t feedQty;
 	uint16_t trigger;
 	uint8_t spd;
-	BTN_INSTANCE_t instance[BTN_MAX];
+	BTN_INSTANCE_t bttns[BTN_MAX];
 } ;
 
 

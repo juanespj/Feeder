@@ -14,10 +14,10 @@
 
 void ble_feeder_init(void);
 void ble_process(void);
-
+void feeder_process(void) ;
 
 #else
-
+extern void feeder_process(void) ;
 extern void ble_feeder_init(void);
 extern void ble_process(void);
 #endif /* INC_BLE_PROCESS_H_ */
