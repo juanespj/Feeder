@@ -1,0 +1,9 @@
+# pack-refs with: peeled
+4183ad0e87b55a0eefaaa4cdb4cbb586467b7c08 refs/tags/latest-v1.X
+b082541c743b9d2f922d217bed12f01b6877ddb0 refs/tags/latest-v2.X
+02c7356368cf71cb3271bd15f2c632bc9571165b refs/tags/release-v1.0.0
+b58e59f885388b71519e9bfec03fbc620ac700dc refs/tags/release-v1.1.0
+6e67634efb3b22e4362c5b53e7505d30a5278406 refs/tags/release-v1.2.0
+3c3785470c9e7b4c9c25dfb3db50a5340362d64b refs/tags/release-v1.2.1
+4183ad0e87b55a0eefaaa4cdb4cbb586467b7c08 refs/tags/release-v1.3.0
+b082541c743b9d2f922d217bed12f01b6877ddb0 refs/tags/release-v2.0.0

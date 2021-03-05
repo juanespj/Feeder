@@ -9,7 +9,7 @@
 
 # ModusToolbox library repos or information about library dependencies
 #libs/
-
+\libs\TARGET_CY8CPROTO-063-BLE\.git
 # Eclipse IDE for ModusToolbox files
 .metadata/
 # .cyignore
@@ -146,4 +146,3 @@ Thumbs.db:encryptable
 ehthumbs.db
 ehthumbs_vista.db
 [Dd]esktop.ini
-

@@ -1,0 +1,15 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	ignorecase = true
+[remote "cypress"]
+	url = https://github.com/cypresssemiconductorco/TARGET_CY8CPROTO-063-BLE
+	fetch = +refs/heads/*:refs/remotes/cypress/*
+[branch "master"]
+	remote = cypress
+	merge = refs/heads/master
+[remote "cypress-offline"]
+	url = /cygdrive/c/Users/jzapn/.modustoolbox/offline/git/https___github.com_cypresssemiconductorco_TARGET_CY8CPROTO-063-BLE/TARGET_CY8CPROTO-063-BLE
+	fetch = +refs/heads/*:refs/remotes/cypress-offline/*
