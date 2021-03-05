@@ -51,7 +51,7 @@ void ble_feeder_init(void) {
 	//wakeup_timer_init();
 	/* Enable global interrupts */
 	__enable_irq();
-	dispense_tmr+=TICK;
+	dispense_tmr += TICK;
 }
 
 /****
@@ -63,26 +63,35 @@ void feeder_process(void) {
 	ble_process();
 	switch (feeder.state) {
 	case IDLE:
+		if (feeder.new_state) {
+			feeder.new_state = false;
+
+		}
 		if (feeder.timestamp == 0) {
 			feeder.state = RTC_OofS;
 		}
 		break;
 	case FEED:
 		if (feeder.new_state) {
-			dispense_tmr=feeder.timestamp;
+			dispense_tmr = feeder.timestamp;
 			//start counter
 			Cy_TCPWM_TriggerStart_Single(motCount_HW, motCount_NUM);
 			//start Motor
 			Cy_TCPWM_TriggerStart_Single(motTrig_HW, motTrig_NUM);
 			//turns off when count is reached
+			feeder.new_state = false;
 		}
-
 
 		break;
 	case RTC_OofS:
-
+		if (feeder.new_state) {
+			feeder.new_state = false;
+		}
 		break;
 	case ERROR:
+		if (feeder.new_state) {
+			feeder.new_state = false;
+		}
 		break;
 	}
 
@@ -152,7 +161,13 @@ void ble_process(void) {
 	}
 	ledtimer += 1;
 //epoch 1614804922
-
+	if (feeder.trigger == 1) {
+		UpdateTime();
+		feeder.trigger = 0;
+	} else if (feeder.trigger == 2) {
+		GetTime();
+		feeder.trigger = 0;
+	}
 //time_t test;
 //	test = GetTime();
 }
@@ -178,7 +193,7 @@ void ble_stack_event_handler(uint32 event, void * eventParam) {
 		iprintf("BLE Stack Event : CY_BLE_EVT_STACK_ON");
 		/* Start Advertisement and enter discoverable mode */
 		ble_api_result = Cy_BLE_GAPP_StartAdvertisement(CY_BLE_ADVERTISING_FAST,
-				CY_BLE_PERIPHERAL_CONFIGURATION_0_INDEX);
+		CY_BLE_PERIPHERAL_CONFIGURATION_0_INDEX);
 		if (ble_api_result == CY_BLE_SUCCESS) {
 			iprintf("BLE Advertisement started successfully");
 		} else {
@@ -190,7 +205,7 @@ void ble_stack_event_handler(uint32 event, void * eventParam) {
 		/* This event is generated at GAP disconnection. */
 		/* Restart advertisement */
 		Cy_BLE_GAPP_StartAdvertisement(CY_BLE_ADVERTISING_FAST,
-				CY_BLE_PERIPHERAL_CONFIGURATION_0_INDEX);
+		CY_BLE_PERIPHERAL_CONFIGURATION_0_INDEX);
 		break;
 		/* This event is generated at the GAP Peripheral end after connection
 		 * is completed with peer Central device */
@@ -241,19 +256,17 @@ void ble_stack_event_handler(uint32 event, void * eventParam) {
 	}
 }
 
-struct tm *date_time;
-
 void UpdateTime(void) {
 	/* Local variables to store calculated color components */
 	cy_rslt_t rslt;
-
+	struct tm *date_time;
 	date_time = localtime(&feeder.timestamp);
-	date_time->tm_year -= 100;
+//date_time->tm_year -= 100;
 	rslt = cyhal_rtc_write(&rtc_obj, date_time);
-	if (CY_RSLT_SUCCESS == rslt) {
-
+	if (CY_RSLT_SUCCESS != rslt) {
+		CY_ASSERT(0);
 	}
-	GetTime();
+	//GetTime();
 }
 
 void GetTime(void) {
@@ -261,12 +274,9 @@ void GetTime(void) {
 	cy_rslt_t rslt;
 
 	rslt = cyhal_rtc_read(&rtc_obj, &feeder.date_time);
-	if (CY_RSLT_SUCCESS == rslt) {
-
+	if (CY_RSLT_SUCCESS != rslt) {
+		CY_ASSERT(0);
 	}
-	feeder.timestamp = mktime(date_time);
+	feeder.timestamp = mktime(&feeder.date_time);
 }
-void UpdateRGBcharacteristic(uint64* timestampData, uint8 timestamplen,
-		uint16 attrHandle) {
 
-}

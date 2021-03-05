@@ -122,7 +122,7 @@ int main(void) {
 	printf("PSoC 6 MCU With BLE Connectivity Find Me\r\n\n");
 
 	for (;;) {
-		ble_process();
+		feeder_process();
 		BTN_task();
 		if (BTN_getPressed(MAIN_BTN)) {
 			/* Insert logic for High pin state */
