@@ -50,7 +50,7 @@
 #include "BLE_process.h"
 #include "feeder.h"
 #include "cycfg_ble.h"
-
+#include "cyhal_gpio.h"
 
 #define TIME_AT_RESET           (00u),   /* Seconds    */\
                                 (00u),   /* Minutes    */\
@@ -84,11 +84,11 @@ void InitializeSystem(void) {
 	result |= Cy_GPIO_Pin_Init(LED1_PORT, LED1_PIN, &LED1_config);
 	result |= Cy_GPIO_Pin_Init(LED2_PORT, LED2_PIN, &LED2_config);
 
-	result |= Cy_GPIO_Pin_Init(BTN_PORT, BTN_PIN, &BTN_config);
-	result |= Cy_GPIO_Pin_Init(BTN_PORT, BTN_PIN, &BTN_config);
 
-	result |= Cy_GPIO_Pin_Init(USR_BTN_PORT, USR_BTN_PIN, &USR_BTN_config);
-	result |= Cy_GPIO_Pin_Init(BTN_PORT, BTN_PIN, &BTN_config);
+	//result |= Cy_GPIO_Pin_Init(USR_BTN_PORT, USR_BTN_PIN, &USR_BTN_config);
+    // Initialize pin P0_0 as an input
+	result |= cyhal_gpio_init(BTN, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_NONE, true);
+	//result |= Cy_GPIO_Pin_Init(BTN_PORT, BTN_PIN, &BTN_config);
 
 	/* GPIO init failed. Stop program execution */
 	if (result != CY_RSLT_SUCCESS) {
@@ -121,9 +121,15 @@ int main(void) {
 	printf("PSoC 6 Feeder\r\n\n");
 
 	for (;;) {
-		BTN_task();
+//		BTN_task();
+		if (cyhal_gpio_read(BTN)==1u) {
+			Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_ON);
+			//	feeder.state = FEED;
+		} else {
+			Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_OFF);
+		}
 		ble_task();
-		feeder_task();
+//		feeder_task();
 	}
 
 }

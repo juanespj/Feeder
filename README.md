@@ -9,7 +9,7 @@ Designed with the - [PSoC 6 BLE Prototyping Kit](https://www.cypress.com/CY8CPRO
  and mostly using the Cypress API's (RTC is very weird with the API so for that one I have used the hal)
 
 
-A bit about the PETnet CAT feeder.
+A bit about the PETnet pet feeder.
 this machine was designed to squeeze the users, all the software was built around a subscription model and the moment you stopped paying or the company went bust the machines just stopped working
 started this project as a challenge to get it working again (to help a friend) and at the same time train on PSOC6.
 

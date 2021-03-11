@@ -11,7 +11,7 @@
 #include "cybsp.h"
 #include "cyhal.h"
 #include "feeder.h"
-
+#include "cyhal_gpio.h"
 /** This structure is used to hold the machine state */
 FeederState feeder;
 time_t dispense_tmr = 0;
@@ -59,7 +59,7 @@ void BTN_task(void) {
 	uint8_t i = 0;
 	//--------------------------------------------
 	// get the values from the GPIO
-	feeder.bttns[MAIN_BTN].sense = !Cy_GPIO_Read(BTN_PORT, BTN_NUM);
+	feeder.bttns[MAIN_BTN].sense = cyhal_gpio_read(BTN);
 	feeder.bttns[USRBTN].sense = !Cy_GPIO_Read(USR_BTN_PORT, USR_BTN_NUM);
 
 	//--------------------------------------------
@@ -100,8 +100,10 @@ void feeder_task(void) {
 	/* Send command to process BLE events */
 	//GetTime();
 	if (BTN_getPressed(MAIN_BTN)) {
-
-		feeder.state = FEED;
+		Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_ON);
+		//	feeder.state = FEED;
+	} else {
+		Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_OFF);
 	}
 
 	feeder.new_state = false;
@@ -117,7 +119,7 @@ void feeder_task(void) {
 
 		}
 		if (feeder.trigger == 2) {
-			feeder.state=FEED;
+			feeder.state = FEED;
 
 		}
 		break;
@@ -125,18 +127,19 @@ void feeder_task(void) {
 		GetTime();
 		if (feeder.new_state) {
 			dispense_tmr = feeder.timestamp;
-		//	Cy_TCPWM_Block_SetPeriod(motCount_HW, motCount_NUM, feeder.feedQty);
+			//	Cy_TCPWM_Block_SetPeriod(motCount_HW, motCount_NUM, feeder.feedQty);
 			//start counter
 			Cy_TCPWM_TriggerStart_Single(motCount_HW, motCount_NUM);
 
-		//	Cy_TCPWM_Block_SetCounter(motTrig_HW, motTrig_NUM, feeder.spd);
+			//	Cy_TCPWM_Block_SetCounter(motTrig_HW, motTrig_NUM, feeder.spd);
 			//start Motor
 			Cy_TCPWM_TriggerStart_Single(motTrig_HW, motTrig_NUM);
 			//turns off when count is reached
 			Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_ON); /*  start the PWM */
 		}
 		/* Get all the enabled pending interrupts */
-		uint32_t interrupts = Cy_TCPWM_GetInterruptStatusMasked(motCount_HW, motCount_NUM);
+		uint32_t interrupts = Cy_TCPWM_GetInterruptStatusMasked(motCount_HW,
+		motCount_NUM);
 		if (0UL != (CY_TCPWM_INT_ON_TC & interrupts)) {
 			/* Handle the Terminal Count event */
 			feeder.state = IDLE;
@@ -145,7 +148,7 @@ void feeder_task(void) {
 			Cy_TCPWM_ClearInterrupt(motCount_HW, motCount_NUM, interrupts);
 		}
 
-		if (feeder.timestamp - dispense_tmr > 8) {	//seconds
+		if (feeder.timestamp - dispense_tmr > 2) {	//seconds
 			Cy_TCPWM_TriggerStopOrKill_Single(motTrig_HW, motTrig_NUM);
 			feeder.state = IDLE;
 			Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_OFF);
