@@ -6,57 +6,55 @@
  */
 #define INC_BLE_PROCESS_H_
 
-#include "../inc/BLE_process.h"
+#include "BLE_process.h"
+#include "feeder.h"
 #include "cycfg_ble.h"
 #include "cy_pdl.h"
 #include "cy_retarget_io.h"
 #include "cybsp.h"
 #include "cyhal.h"
-#include "../inc/feeder.h"
 
 /*******************************************************************************
  * Macros
  ********************************************************************************/
 #define BLESS_INTR_PRIORITY       (1u)
 #define STRING_BUFFER_SIZE (80)
-#define TICK 1//ms
+#define NOTIFY_CCCD_SIZE            (02u)
+
 cyhal_rtc_t rtc_obj;
 
+/** This structure is used to hold the machine state */
+extern FeederState feeder;
 /******************************************************************************
  * Global Variables
  *****************************************************************************/
-/* Variables to hold GATT notification byte count or GATT write byte count */
-static uint32_t gatt_write_rx_bytes;
-static uint32_t notif_tx_bytes;
 
 /* Connection handle to identify the connected peer device */
 static cy_stc_ble_conn_handle_t conn_handle;
-/* Variable to store connection parameters after GAP connection */
-static cy_stc_ble_gap_connected_param_t conn_param;
+
+/* Variable to store information about custom data to be sent as notification to GATT Client */
+static cy_stc_ble_gatt_handle_value_pair_t custom_data;
 /* Flags */
 /* To indicate if GATT Client has subscribed for notifications or not */
 static bool notify_flag;
 /* To indicate if BLE stack is busy or free */
 static bool stack_free = true;
-/* Variable to store information about custom data to be sent as notification to GATT Client */
-static cy_stc_ble_gatt_handle_value_pair_t custom_data;
+
 /* Variable to store MTU size for active BLE connection */
 static uint16_t att_mtu_size = CY_BLE_GATT_MTU;
 
 /* Pointer to store a single attribute information present in the GATT DB of the server */
 static cy_stc_ble_gatt_write_param_t *wrReqParam;
+static cy_stc_ble_gatt_write_param_t tempwrReqParam;
 static void update_gatt_db_notif(cy_stc_ble_gatt_write_param_t *write_param);
 static void update_gatt_db_write(cy_stc_ble_gatt_write_param_t *write_param);
 void ble_stack_event_handler(uint32_t event, void * eventParam);
 static void ble_init(void);
 static void bless_interrupt_handler(void);
-void UpdateTime(void);
-void GetTime(void);
 
+/* Variable used to store the return values of BLE APIs */
+cy_en_ble_api_result_t ble_api_result;
 uint32_t ledtimer = 0;
-time_t dispense_tmr = 0;
-/** This structure is used to hold the machine state */
-struct FeederState feeder;
 
 void ble_feeder_init(void) {
 	/* Configure BLE */
@@ -71,51 +69,6 @@ void ble_feeder_init(void) {
 	//wakeup_timer_init();
 	/* Enable global interrupts */
 	__enable_irq();
-	dispense_tmr += TICK;
-}
-
-/****
- * machine task
- *
- *
- */
-void feeder_process(void) {
-	/* Send command to process BLE events */
-
-	ble_process();
-	switch (feeder.state) {
-	case IDLE:
-		if (feeder.new_state) {
-			feeder.new_state = false;
-
-		}
-		if (feeder.timestamp == 0) {
-			feeder.state = RTC_OofS;
-		}
-		break;
-	case FEED:
-		if (feeder.new_state) {
-			dispense_tmr = feeder.timestamp;
-			//start counter
-			Cy_TCPWM_TriggerStart_Single(motCount_HW, motCount_NUM);
-			//start Motor
-			Cy_TCPWM_TriggerStart_Single(motTrig_HW, motTrig_NUM);
-			//turns off when count is reached
-			feeder.new_state = false;
-		}
-
-		break;
-	case RTC_OofS:
-		if (feeder.new_state) {
-			feeder.new_state = false;
-		}
-		break;
-	case ERROR:
-		if (feeder.new_state) {
-			feeder.new_state = false;
-		}
-		break;
-	}
 
 }
 
@@ -150,8 +103,7 @@ static void ble_init(void) {
 	Cy_BLE_Enable();
 
 	/* Enables BLE Low-power mode (LPM)*/
-	Cy_BLE_EnableLowPowerMode();
-
+	//Cy_BLE_EnableLowPowerMode();
 }
 
 /*******************************************************************************
@@ -162,12 +114,11 @@ static void ble_init(void) {
  *  low power mode as required.
  *
  *******************************************************************************/
-void ble_process(void) {
+void ble_task(void) {
+
 	/* Enter low power mode. The call to enter_low_power_mode also causes the
 	 * device to enter hibernate mode if the BLE stack is shutdown.
 	 */
-	/* Variable used to store the return values of BLE APIs */
-	cy_en_ble_api_result_t ble_api_result;
 
 	// enter_low_power_mode();
 	/* Cy_BLE_ProcessEvents() allows the BLE stack to process pending events */
@@ -178,8 +129,7 @@ void ble_process(void) {
 		if (CY_BLE_ADV_STATE_ADVERTISING == Cy_BLE_GetAdvertisementState()) {
 			Cy_GPIO_Inv(LED1_PORT, LED1_NUM);
 			ledtimer = 50000;
-		} else if (CY_BLE_CONN_STATE_CONNECTED
-				== Cy_BLE_GetConnectionState(conn_handle)) {
+		} else if (CY_BLE_CONN_STATE_CONNECTED == Cy_BLE_GetConnectionState(conn_handle)) {
 			Cy_GPIO_Inv(LED1_PORT, LED1_NUM);
 			//Cy_GPIO_Write(LED1_PORT, LED1_NUM, CYBSP_LED_STATE_ON);
 		} else {
@@ -189,44 +139,30 @@ void ble_process(void) {
 	}
 	ledtimer += 1;
 
-	/* notify_flag is used to indicate if notifications are enabled by
-	 * GATT client */
 	if (notify_flag) {
 		if (stack_free) {
 			/* Send notification */
-			ble_api_result = Cy_BLE_GATTS_SendNotification(&conn_handle,
-					&custom_data);
+			ble_api_result = Cy_BLE_GATTS_SendNotification(&conn_handle, &custom_data);
 
 			if (ble_api_result == CY_BLE_SUCCESS) {
-				/* Increment notification byte count only if notification
-				 * was sent successfully */
-				notif_tx_bytes += custom_data.value.len;
-
-				/* Switch ON LED2 to show data TX */
-				Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_ON);
-
-			} else {
-				/* Sending notifications failed. Switch OFF LED2 to show there is no data TX */
-				Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_OFF);
 
 			}
-		} else {
-			/* Stack is busy. Switch OFF LED2 to show data TX stopped */
-			Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_OFF);
 
 		}
+
 	}
-//epoch 1614804922
-	if (feeder.trigger == 1) {
-		UpdateTime();
+	if (feeder.trigger == 1 && feeder.state == IDLE ) {
 		feeder.trigger = 0;
-	} else if (feeder.trigger == 2) {
-		GetTime();
-		feeder.trigger = 0;
+
+		tempwrReqParam.handleValPair.value.len = 1u;
+		tempwrReqParam.handleValPair.value.actualLen = 0u;
+		tempwrReqParam.handleValPair.value.val = &feeder.trigger;
+		tempwrReqParam.handleValPair.attrHandle = CY_BLE_TRIGGER_MANUALTRIG_CHAR_HANDLE;
+		tempwrReqParam.connHandle = conn_handle;
+		notify_flag=true;
+		update_gatt_db_notif(&tempwrReqParam);
 	}
 
-//time_t test;
-//	test = GetTime();
 }
 /******************************************************************************
  * Function Name: bless_interrupt_handler
@@ -240,8 +176,7 @@ static void bless_interrupt_handler(void) {
 }
 
 void ble_stack_event_handler(uint32 event, void * eventParam) {
-	/* Variable used to store the return values of BLE APIs */
-	cy_en_ble_api_result_t ble_api_result;
+
 	uint32_t tempval = 0;
 	/* 'RGBledData[]' is an array to store 4 bytes of RGB LED data*/
 
@@ -249,8 +184,7 @@ void ble_stack_event_handler(uint32 event, void * eventParam) {
 	case CY_BLE_EVT_STACK_ON:
 		iprintf("BLE Stack Event : CY_BLE_EVT_STACK_ON");
 		/* Start Advertisement and enter discoverable mode */
-		ble_api_result = Cy_BLE_GAPP_StartAdvertisement(
-		CY_BLE_ADVERTISING_FAST,
+		ble_api_result = Cy_BLE_GAPP_StartAdvertisement(CY_BLE_ADVERTISING_FAST,
 		CY_BLE_PERIPHERAL_CONFIGURATION_0_INDEX);
 		if (ble_api_result == CY_BLE_SUCCESS) {
 			iprintf("BLE Advertisement started successfully");
@@ -289,7 +223,6 @@ void ble_stack_event_handler(uint32 event, void * eventParam) {
 		break;
 	}
 
-
 	case CY_BLE_EVT_GAP_DEVICE_DISCONNECTED:
 		/* This event is generated at GAP disconnection. */
 		/* Restart advertisement */
@@ -320,29 +253,24 @@ void ble_stack_event_handler(uint32 event, void * eventParam) {
 		/* Send response to GATT Client device */
 		ble_api_result = Cy_BLE_GATTS_WriteRsp(conn_handle);
 
-		if (CY_BLE_TIME_TIMESTAMP_CHAR_HANDLE
-				== wrReqParam->handleValPair.attrHandle) {
+		if (CY_BLE_TIME_TIMESTAMP_CHAR_HANDLE == wrReqParam->handleValPair.attrHandle) {
 			/* Store RGB LED data in local array */
 			//feeder.timestamp = *(wrReqParam->handleValPair.value.val);
-			memcpy(&tempval, wrReqParam->handleValPair.value.val,
-					(size_t) 0x04u);
+			memcpy(&tempval, wrReqParam->handleValPair.value.val, (size_t) 0x04u);
 			feeder.timestamp = tempval;
 			UpdateTime();
 		}
-		if (CY_BLE_TRIGGER_FEEDQTY_CHAR_HANDLE
-				== wrReqParam->handleValPair.attrHandle) {
+		if (CY_BLE_TRIGGER_FEEDQTY_CHAR_HANDLE == wrReqParam->handleValPair.attrHandle) {
 			/* Store RGB LED data in local array */
 			feeder.feedQty = *(wrReqParam->handleValPair.value.val);
 
 		}
-		if (CY_BLE_TRIGGER_MANUALTRIG_CHAR_HANDLE
-				== wrReqParam->handleValPair.attrHandle) {
+		if (CY_BLE_TRIGGER_MANUALTRIG_CHAR_HANDLE == wrReqParam->handleValPair.attrHandle) {
 			/* Store RGB LED data in local array */
 			feeder.trigger = *(wrReqParam->handleValPair.value.val);
 
 		}
-		if (CY_BLE_TRIGGER_TRIGSPD_CHAR_HANDLE
-				== wrReqParam->handleValPair.attrHandle) {
+		if (CY_BLE_TRIGGER_TRIGSPD_CHAR_HANDLE == wrReqParam->handleValPair.attrHandle) {
 			/* Store RGB LED data in local array */
 			feeder.spd = *(wrReqParam->handleValPair.value.val);
 
@@ -351,10 +279,10 @@ void ble_stack_event_handler(uint32 event, void * eventParam) {
 
 		/* Send response to GATT Client device */
 		Cy_BLE_GATTS_WriteRsp(conn_handle);
-
+		update_gatt_db_notif(wrReqParam);
 		/* Update the attribute with new values received from the client
 		 * device i.e., In this case, enable or disable notification  */
-		update_gatt_db_notif(wrReqParam);
+		//update_gatt_db_notif(wrReqParam);
 		break;
 	default:
 		break;
@@ -371,7 +299,7 @@ void UpdateTime(void) {
 	if (CY_RSLT_SUCCESS != rslt) {
 		CY_ASSERT(0);
 	}
-	//GetTime();
+
 }
 
 void GetTime(void) {
@@ -401,41 +329,38 @@ void GetTime(void) {
 static void update_gatt_db_notif(cy_stc_ble_gatt_write_param_t *write_param) {
 	cy_en_ble_gatt_err_code_t gattErrorCode;
 
-	printf("Info: Attribute handle: 0x%X",
-			write_param->handleValPair.attrHandle);
-	printf("Info: Attribute Value: 0x%X",
-			write_param->handleValPair.value.val[0]);
-
-	notif_tx_bytes = 0u;
-	gatt_write_rx_bytes = 0u;
+	printf("Info: Attribute handle: 0x%X", write_param->handleValPair.attrHandle);
+	printf("Info: Attribute Value: 0x%X", write_param->handleValPair.value.val[0]);
 
 	/* Write into the identified attribute in GATT database */
-	gattErrorCode = Cy_BLE_GATTS_WriteAttributeValuePeer(&conn_handle,
-			&(write_param->handleValPair));
+	gattErrorCode = Cy_BLE_GATTS_WriteAttributeValuePeer(&conn_handle, &(write_param->handleValPair));
 	if (gattErrorCode == CY_BLE_GATT_ERR_NONE) {
 		/* If the attribute is CCCD for notification characteristic */
-		if (write_param->handleValPair.attrHandle
-				== CY_BLE_TRIGGER_MANUALTRIG_CHAR_HANDLE) {
+		if (write_param->handleValPair.attrHandle == CY_BLE_TRIGGER_MANUALTRIG_CLIENT_CHARACTERISTIC_CONFIGURATION_DESC_HANDLE) {
 			/* If notifications are enabled */
 			if (write_param->handleValPair.value.val[0]) {
+				/* Custom data value for BLE notification. */
+				uint8_t custom_notif_data[CY_BLE_GATT_MTU] = { 0 };
 				printf("Notifications Enabled\r\n");
 				notify_flag = true;
 				/* Set the custom notification data using the MTU size */
 				/* Packet length = (ATT_MTU_SIZE - ATT_OPCODE(1 byte) - ATT_HEADER(2 bytes))
 				 *               = (ATT_MTU_SIZE - 3)*/
 				custom_data.value.len = (att_mtu_size - 3u);
-				custom_data.value.val = &feeder.trigger;
+				custom_data.value.val = custom_notif_data;
 				custom_data.attrHandle = CY_BLE_TRIGGER_MANUALTRIG_CHAR_HANDLE;
 			}
+
 			/* If notifications are disabled */
 			else {
 				printf("Notifications Disabled\r\n");
 				notify_flag = false;
 				/* Switch OFF LED2 to show notifications stopped */
-				Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_OFF);
 
+				//xQueueSend(led_cmdQ, &led_status, (TickType_t) 0);
 			}
-
+			/* Start 1 second timer to calculate throughput */
+			//	xTimerStart(timer_handle, (TickType_t) 0);
 		}
 	}
 	/* If the operation is not successful */
@@ -460,20 +385,17 @@ static void update_gatt_db_write(cy_stc_ble_gatt_write_param_t *write_param) {
 	cy_en_ble_gatt_err_code_t gattErrorCode;
 
 	/* Write the attribute value into GATT database of server */
-	gattErrorCode = Cy_BLE_GATTS_WriteAttributeValuePeer(&conn_handle,
-			&(write_param->handleValPair));
+	gattErrorCode = Cy_BLE_GATTS_WriteAttributeValuePeer(&conn_handle, &(write_param->handleValPair));
 
 	/* Check for successful write operation */
 	if (gattErrorCode == CY_BLE_GATT_ERR_NONE) {
 		/* If data is written into value attribute of GATT write characteristic */
-		if (write_param->handleValPair.attrHandle
-				== CY_BLE_TRIGGER_MANUALTRIG_CHAR_HANDLE) {
+		if (write_param->handleValPair.attrHandle == CY_BLE_TRIGGER_MANUALTRIG_CHAR_HANDLE) {
 			/* Copy the data to a variable for further processing in application
 			 * layer if required */
-			memcpy(custom_data.value.val, write_param->handleValPair.value.val,
-					write_param->handleValPair.value.len);
+			memcpy(custom_data.value.val, write_param->handleValPair.value.val, write_param->handleValPair.value.len);
 			/* Increment count of gatt write bytes received */
-			gatt_write_rx_bytes += write_param->handleValPair.value.len;
+			//	gatt_write_rx_bytes += write_param->handleValPair.value.len;
 		}
 	} else {
 		printf("GATT Write API, errorcode = 0x%X ", gattErrorCode);

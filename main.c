@@ -47,9 +47,10 @@
 #include "cybsp.h"
 #include "cyhal.h"
 #include "main.h"
-#include "feeder.h"
 #include "BLE_process.h"
+#include "feeder.h"
 #include "cycfg_ble.h"
+
 
 #define TIME_AT_RESET           (00u),   /* Seconds    */\
                                 (00u),   /* Minutes    */\
@@ -57,8 +58,6 @@
                                 (01u),   /* Date       */\
                                 (01u),   /* Month      */\
                                 (17u)    /* Year 20xx  */
-
-
 
 void InitializeSystem(void) {
 	cy_rslt_t result;
@@ -122,18 +121,11 @@ int main(void) {
 	printf("PSoC 6 Feeder\r\n\n");
 
 	for (;;) {
-		feeder_process();
 		BTN_task();
-		if (BTN_getPressed(MAIN_BTN)) {
-			/* Insert logic for High pin state */
-			Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_ON); /*  start the PWM */
-
-		} else {
-			/* Insert logic for Low pin state */
-			//	Cy_TCPWM_TriggerStopOrKill_Single(motTrig_HW, motTrig_NUM);
-			Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_OFF);
-		}
+		ble_task();
+		feeder_task();
 	}
+
 }
 
 /* END OF FILE */
