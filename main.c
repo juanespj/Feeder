@@ -42,16 +42,17 @@
 /******************************************************************************
  * Header files
  ******************************************************************************/
-#include "cy_pdl.h"
+//#include "cy_pdl.h"
+#include <system.h>
 #include "cy_retarget_io.h"
 #include "cybsp.h"
 #include "cyhal.h"
 #include "main.h"
 #include "BLE_process.h"
-#include "feeder.h"
 #include "cycfg_ble.h"
 #include "cyhal_gpio.h"
-
+#include "ui.h"
+#include "btns.h"
 #define TIME_AT_RESET           (00u),   /* Seconds    */\
                                 (00u),   /* Minutes    */\
                                 (00u),   /* Hours      */\
@@ -59,7 +60,7 @@
                                 (01u),   /* Month      */\
                                 (17u)    /* Year 20xx  */
 
-void InitializeSystem(void) {
+void Init(void) {
 	cy_rslt_t result;
 
 	/* Initialize the device and board peripherals */
@@ -70,26 +71,12 @@ void InitializeSystem(void) {
 		CY_ASSERT(0);
 	}
 
-	/* Initialize retarget-io to use the debug UART port */
-	result = cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX,
-	CY_RETARGET_IO_BAUDRATE);
-	/* retarget-io init failed. Stop program execution */
-	if (result != CY_RSLT_SUCCESS) {
-		CY_ASSERT(0);
-	}
-
 	/* Initialize the User LEDs */
-
 	result |= Cy_GPIO_Pin_Init(LED0_PORT, LED0_PIN, &LED0_config);
 	result |= Cy_GPIO_Pin_Init(LED1_PORT, LED1_PIN, &LED1_config);
 	result |= Cy_GPIO_Pin_Init(LED2_PORT, LED2_PIN, &LED2_config);
 
-
-	//result |= Cy_GPIO_Pin_Init(USR_BTN_PORT, USR_BTN_PIN, &USR_BTN_config);
-    // Initialize pin P0_0 as an input
-	result |= cyhal_gpio_init(BTN, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_NONE, true);
-	//result |= Cy_GPIO_Pin_Init(BTN_PORT, BTN_PIN, &BTN_config);
-
+	BTN_INIT();
 	/* GPIO init failed. Stop program execution */
 	if (result != CY_RSLT_SUCCESS) {
 		CY_ASSERT(0);
@@ -109,27 +96,22 @@ void InitializeSystem(void) {
 	}
 	/* Enable the initialized PWM */
 	Cy_TCPWM_Counter_Enable(motCount_HW, motCount_NUM);
-
+	UI_init();
 	///START BLE
 	ble_feeder_init();
 }
 
+
+char read_data[10];
 int main(void) {
-	InitializeSystem();
-	/* \x1b[2J\x1b[;H - ANSI ESC sequence for clear screen */
-	printf("\x1b[2J\x1b[;H");
-	printf("PSoC 6 Feeder\r\n\n");
+	Init();
 
 	for (;;) {
-//		BTN_task();
-		if (cyhal_gpio_read(BTN)==1u) {
-			Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_ON);
-			//	feeder.state = FEED;
-		} else {
-			Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_OFF);
-		}
+   	BTN_task();
+
 		ble_task();
-//		feeder_task();
+		sys_task();
+
 	}
 
 }

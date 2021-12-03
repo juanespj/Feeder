@@ -1,3 +1,4 @@
+
 /*
  * BLE_process.c
  *
@@ -7,7 +8,7 @@
 #define INC_BLE_PROCESS_H_
 
 #include "BLE_process.h"
-#include "feeder.h"
+#include <system.h>
 #include "cycfg_ble.h"
 #include "cy_pdl.h"
 #include "cy_retarget_io.h"
@@ -24,7 +25,7 @@
 cyhal_rtc_t rtc_obj;
 
 /** This structure is used to hold the machine state */
-extern FeederState feeder;
+extern DEVICE_CFG_t dev;
 /******************************************************************************
  * Global Variables
  *****************************************************************************/
@@ -151,12 +152,12 @@ void ble_task(void) {
 		}
 
 	}
-	if (feeder.trigger == 1 && feeder.state == IDLE ) {
-		feeder.trigger = 0;
+	if (dev.trigger == 1 && dev.state == IDLE ) {
+		dev.trigger = 0;
 
 		tempwrReqParam.handleValPair.value.len = 1u;
 		tempwrReqParam.handleValPair.value.actualLen = 0u;
-		tempwrReqParam.handleValPair.value.val = &feeder.trigger;
+		tempwrReqParam.handleValPair.value.val = &dev.trigger;
 		tempwrReqParam.handleValPair.attrHandle = CY_BLE_TRIGGER_MANUALTRIG_CHAR_HANDLE;
 		tempwrReqParam.connHandle = conn_handle;
 		notify_flag=true;
@@ -255,24 +256,24 @@ void ble_stack_event_handler(uint32 event, void * eventParam) {
 
 		if (CY_BLE_TIME_TIMESTAMP_CHAR_HANDLE == wrReqParam->handleValPair.attrHandle) {
 			/* Store RGB LED data in local array */
-			//feeder.timestamp = *(wrReqParam->handleValPair.value.val);
+			//dev.timestamp = *(wrReqParam->handleValPair.value.val);
 			memcpy(&tempval, wrReqParam->handleValPair.value.val, (size_t) 0x04u);
-			feeder.timestamp = tempval;
+			dev.timestamp = tempval;
 			UpdateTime();
 		}
 		if (CY_BLE_TRIGGER_FEEDQTY_CHAR_HANDLE == wrReqParam->handleValPair.attrHandle) {
 			/* Store RGB LED data in local array */
-			feeder.feedQty = *(wrReqParam->handleValPair.value.val);
+			dev.feedQty = *(wrReqParam->handleValPair.value.val);
 
 		}
 		if (CY_BLE_TRIGGER_MANUALTRIG_CHAR_HANDLE == wrReqParam->handleValPair.attrHandle) {
 			/* Store RGB LED data in local array */
-			feeder.trigger = *(wrReqParam->handleValPair.value.val);
+			dev.trigger = *(wrReqParam->handleValPair.value.val);
 
 		}
 		if (CY_BLE_TRIGGER_TRIGSPD_CHAR_HANDLE == wrReqParam->handleValPair.attrHandle) {
 			/* Store RGB LED data in local array */
-			feeder.spd = *(wrReqParam->handleValPair.value.val);
+		    dev.spd = *(wrReqParam->handleValPair.value.val);
 
 		}
 		/* Send the response to the write request received. */
@@ -293,7 +294,7 @@ void UpdateTime(void) {
 	/* Local variables to store calculated color components */
 	cy_rslt_t rslt;
 	struct tm *date_time;
-	date_time = localtime(&feeder.timestamp);
+	date_time = localtime(&dev.timestamp);
 //date_time->tm_year -= 100;
 	rslt = cyhal_rtc_write(&rtc_obj, date_time);
 	if (CY_RSLT_SUCCESS != rslt) {
@@ -306,11 +307,11 @@ void GetTime(void) {
 	/* Local variables to store calculated color components */
 	cy_rslt_t rslt;
 
-	rslt = cyhal_rtc_read(&rtc_obj, &feeder.date_time);
+	rslt = cyhal_rtc_read(&rtc_obj, &dev.date_time);
 	if (CY_RSLT_SUCCESS != rslt) {
 		CY_ASSERT(0);
 	}
-	feeder.timestamp = mktime(&feeder.date_time);
+	dev.timestamp = mktime(&dev.date_time);
 }
 
 /**********************************************************************************
