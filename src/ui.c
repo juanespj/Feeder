@@ -10,15 +10,9 @@
  * ========================================
  */
 #include "ui.h"
-#include "stdio.h"
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <cyhal.h>
-#include "cybsp.h"
+
 #include "system.h"
-#include "cy_pdl.h"
-#include "cycfg.h"
+
 
 extern DEVICE_CFG_t dev;
 

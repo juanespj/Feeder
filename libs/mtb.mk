@@ -9,10 +9,10 @@ SEARCH_TARGET_CY8CPROTO-063-BLE=./libs/TARGET_CY8CPROTO-063-BLE
 SEARCH_bless=../mtb_shared/bless/latest-v3.X
 SEARCH_retarget-io=../mtb_shared/retarget-io/latest-v1.X
 SEARCH_core-lib=../mtb_shared/core-lib/release-v1.3.0
-SEARCH_core-make=../mtb_shared/core-make/release-v1.9.0
-SEARCH_mtb-hal-cat1=../mtb_shared/mtb-hal-cat1/release-v1.6.0
-SEARCH_mtb-pdl-cat1=../mtb_shared/mtb-pdl-cat1/release-v2.3.1
-SEARCH_psoc6cm0p=../mtb_shared/psoc6cm0p/release-v2.1.4
+SEARCH_core-make=../mtb_shared/core-make/release-v1.9.1
+SEARCH_mtb-hal-cat1=../mtb_shared/mtb-hal-cat1/release-v2.1.0
+SEARCH_mtb-pdl-cat1=../mtb_shared/mtb-pdl-cat1/release-v2.4.1
+SEARCH_psoc6cm0p=../mtb_shared/psoc6cm0p/release-v2.3.0
 SEARCH_recipe-make-cat1a=../mtb_shared/recipe-make-cat1a/release-v1.9.0
 
 # Shared libraries added to build 

@@ -16,6 +16,10 @@
 #include "cybsp.h"
 #include "cy_pdl.h"
 #include "cycfg.h"
+#include "stdio.h"
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 //HAL UART
 
 #define BAUD_RATE       115200
