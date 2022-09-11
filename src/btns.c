@@ -11,8 +11,9 @@
 */
 #include "btns.h"
 #include "cy_pdl.h"
-#include "cycfg.h"
-
+#include "cyhal.h"
+#include "cybsp.h"
+#include "cyhal_gpio.h"
 BTN_INSTANCE_t bttns[BTN_MAX];
 /**
  * @fn bool BTN_getPressed ( BTN_NAMES_t button )
