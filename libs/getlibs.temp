@@ -1,6 +1,0 @@
-D:/EE/Workspaces/Feeder
-C:/Users/jzapn/.modustoolbox/cache
-C:/Users/jzapn/.modustoolbox/offline
-/cygdrive/d/EE/Workspaces/Feeder/libs
-5
--e D:/EE/Workspaces/Feeder/build -e D:/EE/Workspaces/mtb_shared/bless/latest-v3.X/docs -e D:/EE/Workspaces/mtb_shared/retarget-io/latest-v1.X/docs -e D:/EE/Workspaces/mtb_shared/core-lib/release-v1.3.0/docs -e D:/EE/Workspaces/mtb_shared/core-make/release-v1.9.1/make -e D:/EE/Workspaces/mtb_shared/mtb-hal-cat1/release-v2.1.0/docs -e D:/EE/Workspaces/mtb_shared/mtb-pdl-cat1/release-v2.4.1/docs -e D:/EE/Workspaces/mtb_shared/mtb-pdl-cat1/release-v2.4.1/personalities -e D:/EE/Workspaces/mtb_shared/mtb-pdl-cat1/release-v2.4.1/udd -e D:/EE/Workspaces/mtb_shared/recipe-make-cat1a/release-v1.9.0/make
