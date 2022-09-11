@@ -44,10 +44,10 @@ void sys_task(void) {
 		}
 		if(BTN_getPressed(USRBTN)){
 		   		Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_ON);
-		   		uartprint("PSoC Feeder \r\n\n");
+
 			dev.state = FEED;
 		}
-		uartprint("idle \r\n");
+
 		break;
 	case FEED:
 		GetTime();

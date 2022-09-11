@@ -69,6 +69,14 @@ void serialEvent(char inChar)
 		/* code */
 		break;
 	}
+	case 'r':
+		{                    // run
+			dev.state = FEED;
+			uartprint("Start \r\n");
+			uartprint("Start \r\n");
+			uartprint("Start \r\n");
+			break;
+		}
 	case 'h':  {           // help
 		UARTCMD(CLEAR_SCN); // cursor to home command
 		UARTCMD(CURSOR_HOME);
