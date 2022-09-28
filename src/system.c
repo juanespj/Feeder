@@ -41,6 +41,7 @@ void sys_task(void) {
 		}
 		if (dev.trigger == 2) {
 		    dev.state = FEED;
+		    uartprint("feeding");
 		}
 		if(BTN_getPressed(USRBTN)){
 		   		Cy_GPIO_Write(LED0_PORT, LED0_NUM, CYBSP_LED_STATE_ON);
