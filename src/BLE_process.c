@@ -440,16 +440,23 @@ ble_stack_event_handler (uint32 event, void *eventParam)
 	    }
 	  case CY_BLE_TIME_TIMESTAMP_CHAR_HANDLE:
 	    {
-	      uint64_t timestamp=0;
-	      uartprint("\n\r --timestamp ");
-	      for (int i = 0; i < wrReqParam->handleValPair.value.len; i++)
-	      	  {
-	      	    sprintf (msg, "%2.2x ", wrReqParam->handleValPair.value.val[i]);
-	      	    uartprint(msg);
-	      	timestamp= (uint64_t) wrReqParam->handleValPair.value.val[i]<<8*i|timestamp;
-	      	  }
-	      uartprint(" --\n\r");
-	      dev.timestamp = timestamp;
+//	      uint64_t timestamp = 0;
+//	      uartprint("\n\r --timestamp ");
+//	      for (int i = 0; i < wrReqParam->handleValPair.value.len; i++)
+//		{
+////	      	    sprintf (msg, "%2.2x ", wrReqParam->handleValPair.value.val[i]);
+////	      	    uartprint(msg);
+//		  timestamp = (uint64_t) wrReqParam->handleValPair.value.val[i]
+//		      << 8 * i | timestamp;
+//		}
+//	      uartprint(" --\n\r");
+//	      dev.timestamp = timestamp;
+//	      sprintf (msg, "%Lu ", dev.timestamp);
+//	      uartprint(msg);
+	      memcpy (&tempval, wrReqParam->handleValPair.value.val,
+		      wrReqParam->handleValPair.value.len);
+	      dev.timestamp = tempval;
+	      UpdateTime ();
 	      break;
 	    }
 	  }
