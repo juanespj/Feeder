@@ -42,11 +42,12 @@
 /******************************************************************************
  * Header files
  ******************************************************************************/
-//#include "cy_pdl.h"
+#include "cy_pdl.h"
 #include <system.h>
-#include "cy_retarget_io.h"
+//#include "cy_retarget_io.h"
 #include "cybsp.h"
 #include "cyhal.h"
+
 #include "main.h"
 #include "BLE_process.h"
 #include "cycfg_ble.h"
